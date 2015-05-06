@@ -28,8 +28,8 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.bson.BSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,12 +38,12 @@ import java.util.List;
 import static com.mongodb.hadoop.splitter.BSONSplitter.getSplitsFilePath;
 
 
-public class BSONFileInputFormat extends FileInputFormat {
+public class BSONFileInputFormat extends FileInputFormat<Object, BSONObject> {
 
     private static final Log LOG = LogFactory.getLog(BSONFileInputFormat.class);
 
     @Override
-    public RecordReader createRecordReader(final InputSplit split, final TaskAttemptContext context)
+    public RecordReader<Object, BSONObject> createRecordReader(final InputSplit split, final TaskAttemptContext context)
         throws IOException, InterruptedException {
 
         return new BSONFileRecordReader();
@@ -56,10 +56,10 @@ public class BSONFileInputFormat extends FileInputFormat {
     }
 
     @Override
-    public List<FileSplit> getSplits(final JobContext context) throws IOException {
+    public List<InputSplit> getSplits(final JobContext context) throws IOException {
         Configuration config = context.getConfiguration();
         PathFilter pf = getInputPathFilter(context);
-        ArrayList<FileSplit> splits = new ArrayList<FileSplit>();
+        ArrayList<InputSplit> splits = new ArrayList<InputSplit>();
         List<FileStatus> inputFiles = listStatus(context);
         for (FileStatus file : inputFiles) {
             if (pf != null && !pf.accept(file.getPath())) {
